@@ -1,70 +1,135 @@
-# jev-ecc — Jev × ECC karar katmani (Claude Code plugin'i)
+# jev-ecc — a Jev decision layer for ECC / Claude Code
 
-Jev (TypeSafe AI System One) tipli karar + kalibre guven skoru donen bir modeldir; kod/metin uretmez.
-Bu plugin onu ECC/Claude Code'un karar noktalarina baglar ve her karari OTel span'i olarak
-`ecc-tui` oturum trace'ine ekler → Grafana/Tempo'da tek akis.
+[Türkçe README](README.tr.md)
+
+[Jev](https://typesafe.ai) (TypeSafe AI's *System One* model) does not write text or code. It answers typed
+questions — `choice`, `score`, `noul` (yes/no) — with **calibrated confidence** in 70–500 ms, for a fraction of an
+LLM call. That makes it a good fit for the *decision points* inside an agent harness, not for the agent itself.
+
+`jev-ecc` is a Claude Code plugin that wires Jev into four of those points, and streams every decision as an
+OpenTelemetry span into the same trace as the [ECC 2.0](https://github.com/affaan-m/ECC) (`ecc-tui`) session that
+produced it — so Grafana/Tempo shows *session → triage → tool call → gate decision* as one flow.
 
 ```
-kullanici / ecc-tui gorevi
-   │ UserPromptSubmit ──► jev.triage  (tur, risk, profil, hafiza ilgililigi) ──► additionalContext
+user / ecc-tui task
+   │ UserPromptSubmit ──► jev.triage  (task kind, risk, suggested agent profile, relevant memory sections) ──► additionalContext
    ▼
-Claude Code / Codex / GX10 ajan
-   │ PreToolUse ────────► jev.guard   (korunan bolge → deny · salt okunur → gec · Jev → allow/ask/deny)
+Claude Code / Codex / local-model agent
+   │ PreToolUse ────────► jev.guard   (protected paths → deny · read-only → pass · Jev → allow / ask / deny)
    ▼
-denetim (claude-denetci) ──► jev review (severity/actionable/kapsam, tekillestirme)
+reviewer agent ──────────► jev review (severity / actionable / in-scope, local de-duplication)
    │
-   └── her adim ► OTel span (trace = FNV(ECC_SESSION_ID), parent = session span) ► Collector ► Tempo/Prometheus ► Grafana
+   └── every step ► OTel span (trace = FNV-1a(ECC_SESSION_ID), parent = session span) ► Collector ► Tempo + Prometheus ► Grafana
 ```
 
-## Kurulum (bir kez, kullanici kapsami)
-```zsh
-claude plugin marketplace add ~/AgentWorkspace/plugins/jev-ecc     # yerel marketplace "serkan"
-claude plugin install jev-ecc@serkan
-ln -sf ~/AgentWorkspace/plugins/jev-ecc/scripts/jev-cli.sh ~/.local/bin/jev   # `jev` komutu
-```
-Guncelleme: depoda degisiklik + `.claude-plugin/{plugin,marketplace}.json` icinde `version` artir → `claude plugin marketplace update serkan && claude plugin update jev-ecc@serkan` (ayni surum yeniden kopyalanmaz).
+## Install (one command)
 
-## Projede etkinlestirme (opt-in)
-```zsh
-cd /proje && jev init --name proje --desc "Go + Postgres, Docker Compose"
+```sh
+curl -fsSL https://raw.githubusercontent.com/srknkrbb/jev-ecc/main/install.sh | sh
+```
+
+or by hand:
+
+```sh
+claude plugin marketplace add srknkrbb/jev-ecc
+claude plugin install jev-ecc@jev-ecc
+cp ~/.claude/plugins/cache/jev-ecc/jev-ecc/*/scripts/jev-cli.sh ~/.local/bin/jev && chmod +x ~/.local/bin/jev
+```
+
+Requirements: Claude Code ≥ 2.1, Python 3.10+ (standard library only — no SDK, no pip).
+
+## Enable in a project (opt-in)
+
+The hooks are installed user-wide but stay **silent unless the project has `.claude/jev.json`**.
+
+```sh
+cd /your/project
+jev init --name myproject --desc "Go + Postgres, Docker Compose"
 $EDITOR .claude/jev.json        # protected_paths, project_rules, profiles, memory_sources
 jev status                      # mode: live / dry-run
 ```
-`.claude/jev.json` yoksa hook'lar o projede sessizce cikar. Ornek: `config/project.example.json`.
-Anahtar: `TYPESAFE_API_KEY` ya da `~/.agent-secrets/typesafe.key`. Yokken dry-run (gecirgen, yalniz log).
 
-## Yapilandirma (defaults ⊕ proje)
-| Alan | Anlam |
+**API key:** create one at [console.typesafe.ai/keys](https://console.typesafe.ai/keys) and put it in
+`TYPESAFE_API_KEY` or `~/.agent-secrets/typesafe.key`. Without a key everything runs in **dry-run**: hooks are
+transparent and only log the questions they *would* have asked to `.claude/jev/decisions.jsonl` — a good way to
+watch it for a week before turning it on. Alternative endpoints (e.g. Vercel AI Gateway) work via `TYPESAFE_API_URL`.
+
+## The four decision points
+
+| Point | Where | What happens |
+|---|---|---|
+| **Risk gate** | `PreToolUse` on Bash / Edit / Write | writes into `protected_paths` → deterministic **deny** (Jev is not asked); read-only shell commands → pass; everything else → Jev answers `action ∈ {allow, review, block}` plus `irreversible`, `rule_violation`, `touches_protected`, `secret_exposure`. `risk = max(...)` → `≥ .85` deny · `≥ .60` ask · `≥ .35` allow + note · else allow |
+| **Triage** | `UserPromptSubmit` | one request: task kind, risk level, "is this ambiguous?", suggested agent profile, and a relevance score for every `#` section of your plan/memory files → injected as context |
+| **Routing** | `jev triage --task-file F --profile-only --default P --allowed a,b` | picks the agent profile in pipeline scripts; falls back to `--default` when confidence < 0.6, the pick is outside `--allowed`, or Jev is unavailable |
+| **Review triage** | `jev review FINDINGS.md --scope "..." --min high --out X.md [--fail-on high]` | severity / actionable / in-scope per finding, with local de-duplication first |
+
+All thresholds mirror ECC 2.0's `risk_thresholds` (review .35 / confirm .60 / block .85).
+
+## Configuration
+
+`config/defaults.json` ⊕ `<project>/.claude/jev.json` (deep merge). See `config/project.example.json`.
+
+| Key | Meaning |
 |---|---|
-| `thresholds` | review .35 · confirm .60 · block .85 (ecc2 `risk_thresholds` ile ayni) |
-| `on_error` | Jev'e ulasilamazsa: `allow` (varsayilan) / `ask` |
-| `guard.ask_mode` | .60–.85 arasi: `ask` (interaktif onay; `claude -p`'de izin hatasi) / `allow` / `deny` |
-| `guard.protected_paths` | glob; buraya yazan her sey Jev'siz deny |
-| `guard.readonly_bash_regex` | Jev'e sorulmadan gecen komutlar |
-| `triage.profiles` | ecc2.toml profil adi → aciklama; bos ise profil sorusu sorulmaz |
-| `triage.memory_sources` | glob; `#` bolumlerine ayrilir, her bolum icin ilgililik sorulur |
-| `otel.endpoint` | OTLP/HTTP collector (varsayilan 127.0.0.1:14318); `JEV_OTEL=off` kapatir |
+| `thresholds` | review / confirm / block |
+| `on_error` | when Jev is unreachable: `allow` (default) or `ask` |
+| `guard.ask_mode` | for the .60–.85 band: `ask` (interactive prompt; in `claude -p` this becomes a permission error — deliberately fail-safe), `allow`, `deny` |
+| `guard.protected_paths` | globs; any write here is denied without asking Jev |
+| `guard.project_rules` | plain-language rules Jev checks against |
+| `guard.readonly_bash_regex` | commands that pass without a Jev call |
+| `triage.profiles` | `name → description` of your agent profiles (e.g. `ecc2.toml`); empty = no routing question |
+| `triage.memory_sources` | globs split into `#` sections and scored for relevance |
+| `otel.endpoint` | OTLP/HTTP collector (default `http://127.0.0.1:14318`); `JEV_OTEL=off` disables |
 
-Ortam anahtarlari: `JEV_MODE=live|dry-run|mock|off`, `JEV_GUARD=off`, `JEV_TRIAGE=off`, `JEV_OTEL=off`, `JEV_ALWAYS=1` (proje config'i olmadan da calistir), `JEV_PROJECT_DIR`.
+Environment switches: `JEV_MODE=live|dry-run|mock|off`, `JEV_GUARD=off`, `JEV_TRIAGE=off`, `JEV_OTEL=off`,
+`JEV_ALWAYS=1` (run without a project config), `JEV_PROJECT_DIR`.
 
-## Pipeline'da kullanim
-```zsh
-# yazar adiminda profil secimi (guven < .6 ya da kume disi → default)
-prof=$(jev triage --task-file $D/$n.task.txt --profile-only --default gx10-yazar --allowed gx10-yazar,gx10-devstral,codex-guvenli)
-id=$(ecc-tui start --no-worktree --profile "$prof" --task "$(cat $D/$n.task.txt)")
-# denetim sonrasi
-jev review $D/$n.review.md --scope "$(head -1 $spec)" --out $D/$n.triage.md
+## `jev` CLI
+
+```
+jev init | status | selftest ["cmd"] | triage ... | review ... | trace [ECC_SESSION_ID] | log [N]
 ```
 
-## Izleme
-- Span'ler: `jev.guard` (`jev.decision` = allow | allow-review | ask | deny | deny-protected | skip-readonly | dry-run), `jev.triage` (`jev.profile`, `jev.kind`, `jev.risk`), `jev.review` (`jev.sev.*`).
-- Gauge'lar: `jev_risk`, `jev_task_risk`, `jev_review_*`, `jev_session_info{ecc_session_id, trace_id}` (Grafana degiskeni icin).
-- Sayaclar: `jev_decisions_total{jev_hook=guard|triage|kind|review, jev_decision}` (proje-yerel `.claude/jev/counters.json`'dan kumulatif), `jev_tokens_total`.
-- `monitoring/build_dashboards.py` → `grafana/jev-karar-akisi.json` (ayri pano) + `grafana/jev-row.json`; `monitoring/add_row.py <pano.json>` mevcut panoya 'Jev karar akisi' satirini ekler (idempotent); `otel-spanmetrics-dimensions.yaml` collector'a eklenecek boyutlar.
-- Baska bir projede: proje `.claude/jev.json` alir, ayni collector'a yazar; panolar `project_name` label'i ile ayrisir (satir/pano sorgularina `project_name="x"` eklenebilir).
+## Observability
 
-## Test
-`JEV_MODE=mock python3 -m unittest discover -s tests -v`
+Spans: `jev.guard` (`jev.decision` = allow | allow-review | ask | deny | deny-protected | skip-readonly | dry-run),
+`jev.triage` (`jev.profile`, `jev.kind`, `jev.risk`), `jev.review` (`jev.sev.*`).
+Metrics: `jev_decisions_total{jev_hook, jev_decision, project_name}` (cumulative, kept in `.claude/jev/counters.json`),
+`jev_tokens_total`, gauges `jev_risk`, `jev_task_risk`, `jev_latency_ms`, `jev_session_info{ecc_session_id, trace_id}`.
 
-## Maliyet / veri
-Girdi $0.042/MTok, cikti ucretsiz; guard ~300–600 token, triage ~8k token. Jev'e giden: komut metni, dosya yolu, Edit'in ilk 160 / Write'in ilk 300 karakteri, hafiza bolumlerinin ilk 600 karakteri. `.env` icerigi gonderilmez; komut satirindaki sirlar gider (`secret_exposure` sorusu bunu isaretler).
+`monitoring/` ships Grafana dashboards (Prometheus uid `prom`, Tempo uid `tempo`):
+
+```sh
+python3 monitoring/build_dashboards.py                     # → monitoring/grafana/jev-karar-akisi.json + jev-row.json
+python3 monitoring/add_row.py /path/to/your-dashboard.json # adds the "Jev decision flow" row to an existing dashboard
+# append monitoring/otel-spanmetrics-dimensions.yaml to your collector's spanmetrics dimensions (optional)
+```
+
+Trace IDs are derived exactly like `ecc-tui export-otel` does (FNV-1a of the session id), so Jev spans land under the
+ECC session's root span with no shipper involved. Without an ECC session (interactive Claude Code) the trace is
+derived from the Claude session id instead.
+
+## Pipeline example
+
+```sh
+prof=$(jev triage --task-file "$task" --profile-only --default local-writer --allowed local-writer,local-fast)
+id=$(ecc-tui start --no-worktree --profile "$prof" --task "$(cat "$task")")
+# ... after the review step
+jev review "$review_md" --scope "$(head -1 "$spec")" --out "$triage_md"
+```
+
+## What is sent to Jev
+
+The command text, file paths, the first 160 chars of an edit / 300 of a write, the first 600 chars of each memory
+section. `.env` contents are never sent; secrets typed on a command line would be — that is what the `secret_exposure`
+question flags. Cost: input $0.042/MTok, output free; a gate question is ~300–600 tokens, a triage ~8k.
+
+## Tests
+
+```sh
+JEV_MODE=mock python3 -m unittest discover -s tests -v
+```
+
+## License
+
+MIT — see [LICENSE](LICENSE).

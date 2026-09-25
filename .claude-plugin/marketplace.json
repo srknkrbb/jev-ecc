@@ -1,15 +1,28 @@
 {
-  "name": "serkan",
-  "owner": { "name": "Serkan Karababa" },
-  "metadata": { "description": "Serkan'in yerel plugin kalıpları" },
+  "name": "jev-ecc",
+  "owner": {
+    "name": "Serkan Karababa",
+    "url": "https://github.com/srknkrbb"
+  },
+  "metadata": {
+    "description": "Jev (TypeSafe AI System One) decision layer for ECC / Claude Code"
+  },
   "plugins": [
     {
       "name": "jev-ecc",
       "source": "./",
       "description": "Jev karar katmani: risk kapisi, triage/yonlendirme, hafiza filtresi, review triage + OTel/Grafana akisi",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "category": "workflow",
-      "keywords": ["jev", "ecc", "hooks", "otel"]
+      "keywords": [
+        "jev",
+        "ecc",
+        "hooks",
+        "otel"
+      ],
+      "homepage": "https://github.com/srknkrbb/jev-ecc",
+      "repository": "https://github.com/srknkrbb/jev-ecc",
+      "license": "MIT"
     }
   ]
 }

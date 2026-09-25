@@ -55,7 +55,7 @@ def perm(p):
 class ClientTests(unittest.TestCase):
     def test_mock_roundtrip(self):
         r = jev.ask({"x": 1}, {"a": jev.choice("q", {"k1": "", "k2": ""}), "b": jev.noul("q"),
-                               "c": jev.score("q", ["l0", "l1", "l2"])}, cfg=jev.load_config(PLUGIN))
+                               "c": jev.score("q", ["l0", "l1", "l2"])}, cfg=jev.load_config(Path(tempfile.mkdtemp())))
         self.assertTrue(r.ok) and self.assertEqual(r["a"].choice, "k1")
         self.assertAlmostEqual(sum(r["a"].probabilities.values()), 1.0)
         self.assertEqual(r["c"].score, 1.0)
