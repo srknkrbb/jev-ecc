@@ -22,7 +22,7 @@ claude plugin marketplace add ~/AgentWorkspace/plugins/jev-ecc     # yerel marke
 claude plugin install jev-ecc@serkan
 ln -sf ~/AgentWorkspace/plugins/jev-ecc/scripts/jev-cli.sh ~/.local/bin/jev   # `jev` komutu
 ```
-Guncelleme: depoda degisiklik → `claude plugin update jev-ecc@serkan` (ya da marketplace'i yeniden ekle).
+Guncelleme: depoda degisiklik + `.claude-plugin/{plugin,marketplace}.json` icinde `version` artir → `claude plugin marketplace update serkan && claude plugin update jev-ecc@serkan` (ayni surum yeniden kopyalanmaz).
 
 ## Projede etkinlestirme (opt-in)
 ```zsh

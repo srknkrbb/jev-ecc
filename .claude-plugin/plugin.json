@@ -1,6 +1,6 @@
 {
   "name": "jev-ecc",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Jev (TypeSafe AI System One) karar katmani ECC/Claude Code icin: PreToolUse risk kapisi, gorev triage + profil yonlendirme, hafiza ilgililik filtresi, review triage; kararlar OTel span olarak ecc-tui oturum trace'ine eklenir (Grafana/Tempo).",
   "author": { "name": "Serkan Karababa" },
   "license": "MIT",
