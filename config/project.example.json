@@ -1,0 +1,16 @@
+{
+  "project": { "name": "ornek-proje", "description": "Kisa teknoloji ozeti (dil, veritabani, dagitim)" },
+  "guard": {
+    "protected_paths": ["src/core/**", "migrations/**"],
+    "project_rules": ["Korunan bolge salt okunur: src/core, migrations", "main dalina push yok"]
+  },
+  "triage": {
+    "fallback_profile": "claude-guvenli",
+    "profiles": {
+      "claude-guvenli": "Claude Code tam yetkili guvenli profil: planlama, cok dosyali degisiklik",
+      "gx10-yazar":     "Yerel model (GX10): net tarifli tek dosya kod yazma",
+      "claude-denetci": "Salt okunur denetci: diff inceleme, KARAR: ONAY/RET"
+    },
+    "memory_sources": [".claude/denetim/*_plan.md", "CHECKPOINT*.md", ".ecc/memory/**/*.md"]
+  }
+}

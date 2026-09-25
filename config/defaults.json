@@ -1,0 +1,58 @@
+{
+  "project": { "name": "", "description": "" },
+  "model": "jev-latest",
+  "timeout_s": 4,
+  "retries": 2,
+  "on_error": "allow",
+  "log_state_chars": 400,
+  "thresholds": { "review": 0.35, "confirm": 0.6, "block": 0.85 },
+
+  "otel": {
+    "enabled": true,
+    "endpoint": "http://127.0.0.1:14318",
+    "timeout_s": 1.5,
+    "service_name": "jev"
+  },
+
+  "guard": {
+    "enabled": true,
+    "tools": ["Bash", "Edit", "Write", "MultiEdit", "NotebookEdit"],
+    "ask_mode": "ask",
+    "min_block_confidence": 0.7,
+    "skip_readonly_bash": true,
+    "readonly_bash_regex": "^\\s*(ls|cat|head|tail|wc|grep|rg|find|pwd|which|date|echo|diff|test|sleep|git (status|diff|log|show|branch)|docker compose (ps|logs|config)|docker (ps|images|logs)|make (ps|logs|smoke|go-test|test))\\b[^|;&>]*$",
+    "protected_paths": [],
+    "project_rules": [
+      "git push, git merge, git reset --hard, git clean -fdx YASAK",
+      "docker compose down -v, docker volume rm/prune, docker system prune YASAK (veri kaybi)",
+      "sudo, rm -rf, ssh/scp, secret/parola sizdirma YASAK"
+    ]
+  },
+
+  "triage": {
+    "enabled": true,
+    "min_prompt_chars": 24,
+    "fallback_profile": "",
+    "profiles": {},
+    "task_kinds": {
+      "plan":      "Plan, tasarim, madde listesi cikarma",
+      "implement": "Yeni ozellik / kod yazma",
+      "fix":       "Hata duzeltme, testi gecirme",
+      "review":    "Kod/diff inceleme, denetim",
+      "security":  "Guvenlik bulgusu kapatma veya degerlendirme",
+      "config":    "Docker/compose/Makefile/env/nginx yapilandirma",
+      "docs":      "Dokuman, rapor, README yazma",
+      "question":  "Soru/aciklama, kod degisikligi istemiyor"
+    },
+    "memory_sources": [".ecc/memory/**/*.md", "CLAUDE.md", "README.md"],
+    "max_sections": 40,
+    "max_sections_per_file": 10,
+    "section_chars": 600,
+    "top_k": 5,
+    "min_relevance": 0.6,
+    "inline_memory": false,
+    "inline_chars": 1200
+  },
+
+  "review": { "chunk": 40, "dedupe_ratio": 0.82 }
+}

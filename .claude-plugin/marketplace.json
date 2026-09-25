@@ -1,0 +1,15 @@
+{
+  "name": "serkan",
+  "owner": { "name": "Serkan Karababa" },
+  "metadata": { "description": "Serkan'in yerel plugin kalıpları" },
+  "plugins": [
+    {
+      "name": "jev-ecc",
+      "source": "./",
+      "description": "Jev karar katmani: risk kapisi, triage/yonlendirme, hafiza filtresi, review triage + OTel/Grafana akisi",
+      "version": "0.2.0",
+      "category": "workflow",
+      "keywords": ["jev", "ecc", "hooks", "otel"]
+    }
+  ]
+}
