@@ -7,7 +7,7 @@
       "name": "jev-ecc",
       "source": "./",
       "description": "Jev karar katmani: risk kapisi, triage/yonlendirme, hafiza filtresi, review triage + OTel/Grafana akisi",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "category": "workflow",
       "keywords": ["jev", "ecc", "hooks", "otel"]
     }
