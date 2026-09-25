@@ -6,7 +6,9 @@ Proje dosyasi yoksa hook'lar KAPALIDIR (JEV_ALWAYS=1 ile zorlanabilir) — plugi
 kurulu olsa bile yalniz opt-in projelerde calisir.
 
 Modlar (JEV_MODE ile zorlanabilir):
-  live     TYPESAFE_API_KEY (ya da ~/.agent-secrets/typesafe.key) var → POST https://api.typesafe.ai/v1/systemone
+  live     TYPESAFE_API_KEY (ya da ~/.agent-secrets/typesafe.key / jev.env) var → POST https://api.typesafe.ai/v1/systemone
+           Vercel AI Gateway: TYPESAFE_API_URL=https://ai-gateway.vercel.sh/typesafe/v1/systemone + AI_GATEWAY_API_KEY
+           (model otomatik "typesafe-ai/jev"; istek/yanit bicimi birebir ayni)
   dry-run  anahtar yok → soru decisions.jsonl'e yazilir, cevap donmez (hook'lar gecirgen)
   mock     testler: deterministik cevap; JEV_MOCK_ANSWERS='{"soru_id": {...}}' ile ezilir
   off      hicbir sey yapma
@@ -30,7 +32,44 @@ from typing import Any
 HERE = Path(__file__).resolve().parent
 PLUGIN_ROOT = HERE.parent
 DEFAULTS_PATH = PLUGIN_ROOT / "config" / "defaults.json"
-API_URL = os.environ.get("TYPESAFE_API_URL", "https://api.typesafe.ai/v1/systemone")
+SECRET_ENV = Path.home() / ".agent-secrets" / "jev.env"   # TYPESAFE_API_KEY=... TYPESAFE_API_URL=... TYPESAFE_MODEL=...
+
+
+def _load_secret_env() -> None:
+    """~/.agent-secrets/jev.env icindeki KEY=VALUE satirlarini ortam degiskeni olarak yukler (ortam onceliklidir).
+    Hook'lar Claude Code / ecc-tui altinda calisirken kabuk ortamina guvenmemek icin."""
+    try:
+        for line in SECRET_ENV.read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            k, v = line.split("=", 1)
+            k, v = k.strip(), v.strip().strip('"').strip("'")
+            if k and v and not os.environ.get(k):
+                os.environ[k] = v
+    except Exception:
+        pass
+
+
+_load_secret_env()
+DEFAULT_API_URL = "https://api.typesafe.ai/v1/systemone"
+VERCEL_API_URL = "https://ai-gateway.vercel.sh/typesafe/v1/systemone"
+API_URL = os.environ.get("TYPESAFE_API_URL") or (VERCEL_API_URL if os.environ.get("AI_GATEWAY_API_KEY") and not os.environ.get("TYPESAFE_API_KEY") else DEFAULT_API_URL)
+
+
+def provider() -> str:
+    return "vercel-ai-gateway" if "ai-gateway.vercel.sh" in API_URL else "typesafe" if "api.typesafe.ai" in API_URL else "custom"
+
+
+def default_model(cfg: dict | None = None) -> str:
+    """Model adi: TYPESAFE_MODEL > proje config > saglayiciya gore (Vercel: typesafe-ai/jev, TypeSafe: jev-latest)."""
+    m = os.environ.get("TYPESAFE_MODEL", "").strip()
+    if m:
+        return m
+    cm = (cfg or {}).get("model")
+    if cm and cm != "jev-latest":
+        return cm
+    return "typesafe-ai/jev" if provider() == "vercel-ai-gateway" else (cm or "jev-latest")
 
 _CFG: dict[str, dict] = {}
 
@@ -100,6 +139,10 @@ def api_key() -> str | None:
     key = os.environ.get("TYPESAFE_API_KEY", "").strip()
     if key:
         return key
+    if provider() == "vercel-ai-gateway":
+        key = os.environ.get("AI_GATEWAY_API_KEY", "").strip()
+        if key:
+            return key
     try:
         v = (Path.home() / ".agent-secrets" / "typesafe.key").read_text(encoding="utf-8").strip()
         if v:
@@ -242,7 +285,7 @@ def ask(state: Any, questions: dict[str, dict], *, cfg: dict | None = None, tag:
         model: str | None = None, timeout: float | None = None) -> Result:
     cfg = cfg or load_config()
     m = mode()
-    model = model or cfg.get("model", "jev-latest")
+    model = model or default_model(cfg)
     timeout = timeout or float(cfg.get("timeout_s", 4))
     retries = int(cfg.get("retries", 2))
     t0 = time.time()
@@ -322,5 +365,6 @@ if __name__ == "__main__":
                                                      "risky": "Veri veya durum kaybi olasi"}),
         "irreversible": noul("Komut geri alinamaz veri kaybina yol acabilir")}, cfg=cfg, tag="selftest")
     print(json.dumps({"project": cfg["project"]["name"], "project_config": cfg["_project_config"],
+                      "provider": provider(), "url": API_URL, "model": default_model(cfg),
                       "mode": r.mode, "ok": r.ok, "error": r.error, "latency_ms": r.latency_ms,
                       "risk": r["risk"].raw, "irreversible": r["irreversible"].raw}, ensure_ascii=False, indent=2))

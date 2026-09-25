@@ -48,6 +48,8 @@ def cmd_status(_: list[str]) -> int:
     import otel
     print(json.dumps({"project": cfg["project"], "root": cfg["_root"], "project_config": cfg["_project_config"],
                       "enabled": jev.enabled(cfg), "mode": jev.mode(), "api_key": bool(jev.api_key()),
+                      "provider": jev.provider(), "url": jev.API_URL, "model": jev.default_model(cfg),
+                      "secret_env": str(jev.SECRET_ENV) if jev.SECRET_ENV.exists() else None,
                       "otel": cfg.get("otel"), "ecc_session": os.environ.get("ECC_SESSION_ID", ""),
                       "trace_ctx": otel.context(), "plugin": str(HERE.parent)}, ensure_ascii=False, indent=2))
     return 0

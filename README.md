@@ -49,10 +49,26 @@ $EDITOR .claude/jev.json        # protected_paths, project_rules, profiles, memo
 jev status                      # mode: live / dry-run
 ```
 
-**API key:** create one at [console.typesafe.ai/keys](https://console.typesafe.ai/keys) and put it in
-`TYPESAFE_API_KEY` or `~/.agent-secrets/typesafe.key`. Without a key everything runs in **dry-run**: hooks are
-transparent and only log the questions they *would* have asked to `.claude/jev/decisions.jsonl` — a good way to
-watch it for a week before turning it on. Alternative endpoints (e.g. Vercel AI Gateway) work via `TYPESAFE_API_URL`.
+**API key — two routes, pick one:**
+
+| Route | Where | Credentials | Notes |
+|---|---|---|---|
+| TypeSafe direct | [console.typesafe.ai/keys](https://console.typesafe.ai/keys) | `TYPESAFE_API_KEY` | new signups were paused in Sept 2026 — the console shows a waitlist form; join it, then use the Vercel route meanwhile |
+| **Vercel AI Gateway** | [vercel.com/ai-gateway](https://vercel.com/ai-gateway) → API keys | `AI_GATEWAY_API_KEY` | no TypeSafe account needed; same request/response shape, same price, billed through Vercel; model id `typesafe-ai/jev` is selected automatically |
+
+Put the credentials in `~/.agent-secrets/jev.env` (loaded by the hooks, so nothing depends on your shell env):
+
+```sh
+# ~/.agent-secrets/jev.env  — Vercel route
+TYPESAFE_API_URL=https://ai-gateway.vercel.sh/typesafe/v1/systemone
+AI_GATEWAY_API_KEY=vck_...
+# or — TypeSafe direct
+# TYPESAFE_API_KEY=ts_...
+```
+
+(`TYPESAFE_API_KEY` / `~/.agent-secrets/typesafe.key` / `TYPESAFE_MODEL` are honoured too.) Without a key everything
+runs in **dry-run**: hooks are transparent and only log the questions they *would* have asked to
+`.claude/jev/decisions.jsonl` — a good way to watch it for a week before turning it on. `jev status` shows the provider.
 
 ## The four decision points
 

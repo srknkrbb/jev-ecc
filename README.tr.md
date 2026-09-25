@@ -34,7 +34,14 @@ $EDITOR .claude/jev.json        # protected_paths, project_rules, profiles, memo
 jev status                      # mode: live / dry-run
 ```
 `.claude/jev.json` yoksa hook'lar o projede sessizce cikar. Ornek: `config/project.example.json`.
-Anahtar: `TYPESAFE_API_KEY` ya da `~/.agent-secrets/typesafe.key`. Yokken dry-run (gecirgen, yalniz log).
+Anahtar — iki yol: (1) TypeSafe dogrudan: `console.typesafe.ai/keys` → `TYPESAFE_API_KEY` (Eylul 2026'da yeni kayitlar duraklatildi, bekleme listesi var);
+(2) **Vercel AI Gateway**: TypeSafe hesabi gerekmez, `vercel.com/ai-gateway` → API key → `AI_GATEWAY_API_KEY`; ayni istek/yanit bicimi, ayni fiyat, model `typesafe-ai/jev` otomatik secilir.
+Bilgileri `~/.agent-secrets/jev.env` dosyasina yaz (hook'lar kabuk ortamina bakmadan okur):
+```
+TYPESAFE_API_URL=https://ai-gateway.vercel.sh/typesafe/v1/systemone
+AI_GATEWAY_API_KEY=vck_...
+```
+Anahtar yokken dry-run (gecirgen, yalniz log). `jev status` saglayiciyi gosterir.
 
 ## Yapilandirma (defaults ⊕ proje)
 | Alan | Anlam |
