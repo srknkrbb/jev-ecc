@@ -105,7 +105,9 @@ def run_triage(task: str, root: Path, *, allowed: list[str] | None = None, hook_
                      "jev.memory_hits": len(res["memory"]), "jev.sections_scanned": len(sections),
                      "jev.latency_ms": r.latency_ms, "task.head": task[:200],
                      "jev.input_tokens": int(r.usage.get("input_tokens", 0) or 0)},
-              gauges={"jev_task_risk": res["risk"]} if res["risk"] is not None else None)
+              gauges={k: v for k, v in {"jev_task_risk": res["risk"], "jev_latency_ms": float(r.latency_ms or 0) or None}.items() if v is not None} or None,
+              counters={f"decisions|triage|{res['profile'] or '-'}": 1, f"decisions|kind|{res['kind'] or r.mode}": 1,
+                        **({"tokens|triage|input": int(r.usage.get("input_tokens", 0) or 0)} if r.ok else {})})
     try:
         (jev.log_dir(cfg) / "last_triage.json").write_text(json.dumps(res, ensure_ascii=False, indent=1), encoding="utf-8")
     except Exception:

@@ -1,0 +1,1482 @@
+[
+ {
+  "id": 1019,
+  "type": "row",
+  "title": "Jev karar akışı",
+  "collapsed": false,
+  "gridPos": {
+   "x": 0,
+   "y": 0,
+   "w": 24,
+   "h": 1
+  },
+  "panels": []
+ },
+ {
+  "id": 1020,
+  "type": "stat",
+  "title": "İzin · 24s",
+  "description": "Jev'in izin verdiği araç çağrıları (allow + allow-review)",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 0,
+   "y": 1,
+   "w": 4,
+   "h": 4
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "sum(increase(jev_decisions_total{jev_hook=\"guard\", jev_decision=~\"allow|allow-review\"}[24h])) or vector(0)",
+    "instant": false,
+    "range": true
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "none",
+    "decimals": 0,
+    "noValue": "0",
+    "color": {
+     "mode": "fixed",
+     "fixedColor": "#73BF69"
+    },
+    "thresholds": {
+     "mode": "absolute",
+     "steps": [
+      {
+       "color": "#73BF69",
+       "value": null
+      }
+     ]
+    }
+   },
+   "overrides": []
+  },
+  "options": {
+   "reduceOptions": {
+    "calcs": [
+     "lastNotNull"
+    ],
+    "fields": "",
+    "values": false
+   },
+   "colorMode": "value",
+   "graphMode": "area",
+   "textMode": "value",
+   "justifyMode": "center",
+   "text": {
+    "valueSize": 36
+   }
+  }
+ },
+ {
+  "id": 1021,
+  "type": "stat",
+  "title": "Onay istendi · 24s",
+  "description": "Risk .60–.85 arası: interaktifte onay, claude -p'de izin hatası",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 4,
+   "y": 1,
+   "w": 4,
+   "h": 4
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "sum(increase(jev_decisions_total{jev_hook=\"guard\", jev_decision=\"ask\"}[24h])) or vector(0)",
+    "instant": false,
+    "range": true
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "none",
+    "decimals": 0,
+    "noValue": "0",
+    "color": {
+     "mode": "fixed",
+     "fixedColor": "#FF9830"
+    },
+    "thresholds": {
+     "mode": "absolute",
+     "steps": [
+      {
+       "color": "#FF9830",
+       "value": null
+      }
+     ]
+    }
+   },
+   "overrides": []
+  },
+  "options": {
+   "reduceOptions": {
+    "calcs": [
+     "lastNotNull"
+    ],
+    "fields": "",
+    "values": false
+   },
+   "colorMode": "value",
+   "graphMode": "area",
+   "textMode": "value",
+   "justifyMode": "center",
+   "text": {
+    "valueSize": 36
+   }
+  }
+ },
+ {
+  "id": 1022,
+  "type": "stat",
+  "title": "Engellendi · 24s",
+  "description": "Jev deny + korunan bölge deterministik deny",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 8,
+   "y": 1,
+   "w": 4,
+   "h": 4
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "sum(increase(jev_decisions_total{jev_hook=\"guard\", jev_decision=~\"deny|deny-protected\"}[24h])) or vector(0)",
+    "instant": false,
+    "range": true
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "none",
+    "decimals": 0,
+    "noValue": "0",
+    "color": {
+     "mode": "fixed",
+     "fixedColor": "#F2495C"
+    },
+    "thresholds": {
+     "mode": "absolute",
+     "steps": [
+      {
+       "color": "#F2495C",
+       "value": null
+      }
+     ]
+    }
+   },
+   "overrides": []
+  },
+  "options": {
+   "reduceOptions": {
+    "calcs": [
+     "lastNotNull"
+    ],
+    "fields": "",
+    "values": false
+   },
+   "colorMode": "value",
+   "graphMode": "area",
+   "textMode": "value",
+   "justifyMode": "center",
+   "text": {
+    "valueSize": 36
+   }
+  }
+ },
+ {
+  "id": 1023,
+  "type": "stat",
+  "title": "Korunan bölge · 24s",
+  "description": "Jev'e sorulmadan engellenen korunan-bölge yazmaları",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 12,
+   "y": 1,
+   "w": 4,
+   "h": 4
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "sum(increase(jev_decisions_total{jev_hook=\"guard\", jev_decision=\"deny-protected\"}[24h])) or vector(0)",
+    "instant": false,
+    "range": true
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "none",
+    "decimals": 0,
+    "noValue": "0",
+    "color": {
+     "mode": "fixed",
+     "fixedColor": "#C4162A"
+    },
+    "thresholds": {
+     "mode": "absolute",
+     "steps": [
+      {
+       "color": "#C4162A",
+       "value": null
+      }
+     ]
+    }
+   },
+   "overrides": []
+  },
+  "options": {
+   "reduceOptions": {
+    "calcs": [
+     "lastNotNull"
+    ],
+    "fields": "",
+    "values": false
+   },
+   "colorMode": "value",
+   "graphMode": "area",
+   "textMode": "value",
+   "justifyMode": "center",
+   "text": {
+    "valueSize": 36
+   }
+  }
+ },
+ {
+  "id": 1024,
+  "type": "stat",
+  "title": "Jev gecikmesi · ort 1s",
+  "description": "Jev API yanıt süresi (dry-run'da veri yok)",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 16,
+   "y": 1,
+   "w": 4,
+   "h": 4
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "avg(avg_over_time(jev_latency_ms[1h]))",
+    "instant": false,
+    "range": true
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "ms",
+    "decimals": 0,
+    "noValue": "—",
+    "color": {
+     "mode": "fixed",
+     "fixedColor": "#5794F2"
+    },
+    "thresholds": {
+     "mode": "absolute",
+     "steps": [
+      {
+       "color": "#5794F2",
+       "value": null
+      }
+     ]
+    }
+   },
+   "overrides": []
+  },
+  "options": {
+   "reduceOptions": {
+    "calcs": [
+     "lastNotNull"
+    ],
+    "fields": "",
+    "values": false
+   },
+   "colorMode": "value",
+   "graphMode": "area",
+   "textMode": "value",
+   "justifyMode": "center",
+   "text": {
+    "valueSize": 36
+   }
+  }
+ },
+ {
+  "id": 1025,
+  "type": "stat",
+  "title": "Son risk",
+  "description": "Son 10 dk'daki en yüksek kapı riski (0–1)",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 20,
+   "y": 1,
+   "w": 4,
+   "h": 4
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "max(max_over_time(jev_risk[10m]))",
+    "instant": false,
+    "range": true
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "none",
+    "decimals": 2,
+    "noValue": "—",
+    "color": {
+     "mode": "fixed",
+     "fixedColor": "#FF9830"
+    },
+    "thresholds": {
+     "mode": "absolute",
+     "steps": [
+      {
+       "color": "#FF9830",
+       "value": null
+      }
+     ]
+    }
+   },
+   "overrides": []
+  },
+  "options": {
+   "reduceOptions": {
+    "calcs": [
+     "lastNotNull"
+    ],
+    "fields": "",
+    "values": false
+   },
+   "colorMode": "value",
+   "graphMode": "area",
+   "textMode": "value",
+   "justifyMode": "center",
+   "text": {
+    "valueSize": 36
+   }
+  }
+ },
+ {
+  "id": 1026,
+  "type": "timeseries",
+  "title": "Kararlar / 10 dk",
+  "description": "allow · allow-review · ask · deny · deny-protected · skip-readonly · dry-run",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 0,
+   "y": 5,
+   "w": 12,
+   "h": 8
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "sum by (jev_decision) (increase(jev_decisions_total{jev_hook=\"guard\"}[10m]))",
+    "legendFormat": "{{jev_decision}}",
+    "range": true
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "none",
+    "decimals": 0,
+    "noValue": "Jev karari yok",
+    "color": {
+     "mode": "palette-classic"
+    },
+    "custom": {
+     "drawStyle": "bars",
+     "lineWidth": 1,
+     "fillOpacity": 70,
+     "gradientMode": "none",
+     "showPoints": "never",
+     "stacking": {
+      "mode": "normal",
+      "group": "A"
+     }
+    }
+   },
+   "overrides": [
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "allow"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#73BF69"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "allow-review"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#B7D75A"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "ask"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#FF9830"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "deny"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#F2495C"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "deny-protected"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#C4162A"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "skip-readonly"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#5794F2"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "dry-run"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8E8E8E"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "error"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8E8E8E"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "claude-guvenli"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#D97757"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "claude-denetci"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#E0A088"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "codex-guvenli"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#10A37F"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-yazar"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#A352CC"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-devstral"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#C77DE0"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-kodlayici"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8A2BE2"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "options": {
+   "legend": {
+    "displayMode": "list",
+    "placement": "bottom",
+    "showLegend": true
+   },
+   "tooltip": {
+    "mode": "multi",
+    "sort": "desc"
+   }
+  }
+ },
+ {
+  "id": 1027,
+  "type": "bargauge",
+  "title": "Profil yönlendirme · 24s",
+  "description": "Triage'ın önerdiği ecc2 profili",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 12,
+   "y": 5,
+   "w": 6,
+   "h": 8
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "sum by (jev_decision) (increase(jev_decisions_total{jev_hook=\"triage\"}[24h]))",
+    "legendFormat": "{{jev_decision}}",
+    "instant": true,
+    "range": false
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "none",
+    "decimals": 0,
+    "noValue": "veri yok",
+    "color": {
+     "mode": "palette-classic"
+    },
+    "thresholds": {
+     "mode": "absolute",
+     "steps": [
+      {
+       "color": "#5794F2",
+       "value": null
+      }
+     ]
+    }
+   },
+   "overrides": [
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "allow"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#73BF69"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "allow-review"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#B7D75A"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "ask"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#FF9830"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "deny"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#F2495C"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "deny-protected"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#C4162A"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "skip-readonly"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#5794F2"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "dry-run"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8E8E8E"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "error"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8E8E8E"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "claude-guvenli"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#D97757"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "claude-denetci"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#E0A088"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "codex-guvenli"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#10A37F"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-yazar"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#A352CC"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-devstral"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#C77DE0"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-kodlayici"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8A2BE2"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "options": {
+   "reduceOptions": {
+    "calcs": [
+     "lastNotNull"
+    ],
+    "fields": "",
+    "values": false
+   },
+   "orientation": "horizontal",
+   "displayMode": "gradient",
+   "showUnfilled": true,
+   "namePlacement": "left",
+   "sizing": "auto",
+   "minVizHeight": 16
+  }
+ },
+ {
+  "id": 1028,
+  "type": "bargauge",
+  "title": "İş türü · 24s",
+  "description": "plan · implement · fix · review · security · config · docs · question",
+  "datasource": {
+   "type": "prometheus",
+   "uid": "prom"
+  },
+  "gridPos": {
+   "x": 18,
+   "y": 5,
+   "w": 6,
+   "h": 8
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "prometheus",
+     "uid": "prom"
+    },
+    "refId": "A",
+    "expr": "sum by (jev_decision) (increase(jev_decisions_total{jev_hook=\"kind\"}[24h]))",
+    "legendFormat": "{{jev_decision}}",
+    "instant": true,
+    "range": false
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "unit": "none",
+    "decimals": 0,
+    "noValue": "veri yok",
+    "color": {
+     "mode": "palette-classic"
+    },
+    "thresholds": {
+     "mode": "absolute",
+     "steps": [
+      {
+       "color": "#5794F2",
+       "value": null
+      }
+     ]
+    }
+   },
+   "overrides": [
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "allow"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#73BF69"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "allow-review"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#B7D75A"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "ask"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#FF9830"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "deny"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#F2495C"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "deny-protected"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#C4162A"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "skip-readonly"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#5794F2"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "dry-run"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8E8E8E"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "error"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8E8E8E"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "claude-guvenli"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#D97757"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "claude-denetci"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#E0A088"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "codex-guvenli"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#10A37F"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-yazar"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#A352CC"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-devstral"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#C77DE0"
+       }
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "gx10-kodlayici"
+     },
+     "properties": [
+      {
+       "id": "color",
+       "value": {
+        "mode": "fixed",
+        "fixedColor": "#8A2BE2"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "options": {
+   "reduceOptions": {
+    "calcs": [
+     "lastNotNull"
+    ],
+    "fields": "",
+    "values": false
+   },
+   "orientation": "horizontal",
+   "displayMode": "gradient",
+   "showUnfilled": true,
+   "namePlacement": "left",
+   "sizing": "auto",
+   "minVizHeight": 16
+  }
+ },
+ {
+  "id": 1029,
+  "type": "table",
+  "title": "Son Jev kararları — en yeni üstte",
+  "description": "Her satır bir karar; İz'e tıklayınca ecc-tui oturumunun tüm akışı açılır",
+  "datasource": {
+   "type": "tempo",
+   "uid": "tempo"
+  },
+  "gridPos": {
+   "x": 0,
+   "y": 13,
+   "w": 24,
+   "h": 10
+  },
+  "targets": [
+   {
+    "datasource": {
+     "type": "tempo",
+     "uid": "tempo"
+    },
+    "refId": "A",
+    "queryType": "traceql",
+    "tableType": "spans",
+    "limit": 50,
+    "spss": 50,
+    "query": "{ resource.service.name = \"jev\" } | select(span.ecc.session.id, span.jev.hook, span.jev.decision, span.jev.risk, span.jev.profile, span.tool.name, span.tool.input_summary, span.task.head)"
+   }
+  ],
+  "fieldConfig": {
+   "defaults": {
+    "custom": {
+     "align": "left"
+    }
+   },
+   "overrides": [
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "Karar"
+     },
+     "properties": [
+      {
+       "id": "custom.width",
+       "value": 120
+      },
+      {
+       "id": "custom.cellOptions",
+       "value": {
+        "type": "color-text"
+       }
+      },
+      {
+       "id": "mappings",
+       "value": [
+        {
+         "type": "value",
+         "options": {
+          "allow": {
+           "color": "#73BF69",
+           "index": 0
+          },
+          "allow-review": {
+           "color": "#B7D75A",
+           "index": 1
+          },
+          "ask": {
+           "color": "#FF9830",
+           "index": 2
+          },
+          "deny": {
+           "color": "#F2495C",
+           "index": 3
+          },
+          "deny-protected": {
+           "color": "#C4162A",
+           "index": 4
+          },
+          "skip-readonly": {
+           "color": "#5794F2",
+           "index": 5
+          },
+          "dry-run": {
+           "color": "#8E8E8E",
+           "index": 6
+          },
+          "error": {
+           "color": "#8E8E8E",
+           "index": 7
+          },
+          "claude-guvenli": {
+           "color": "#D97757",
+           "index": 8
+          },
+          "claude-denetci": {
+           "color": "#E0A088",
+           "index": 9
+          },
+          "codex-guvenli": {
+           "color": "#10A37F",
+           "index": 10
+          },
+          "gx10-yazar": {
+           "color": "#A352CC",
+           "index": 11
+          },
+          "gx10-devstral": {
+           "color": "#C77DE0",
+           "index": 12
+          },
+          "gx10-kodlayici": {
+           "color": "#8A2BE2",
+           "index": 13
+          }
+         }
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "Zaman"
+     },
+     "properties": [
+      {
+       "id": "custom.width",
+       "value": 170
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "Oturum"
+     },
+     "properties": [
+      {
+       "id": "custom.width",
+       "value": 95
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "Nokta"
+     },
+     "properties": [
+      {
+       "id": "custom.width",
+       "value": 70
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "Risk"
+     },
+     "properties": [
+      {
+       "id": "custom.width",
+       "value": 60
+      },
+      {
+       "id": "decimals",
+       "value": 2
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "Araç"
+     },
+     "properties": [
+      {
+       "id": "custom.width",
+       "value": 80
+      }
+     ]
+    },
+    {
+     "matcher": {
+      "id": "byName",
+      "options": "İz"
+     },
+     "properties": [
+      {
+       "id": "custom.width",
+       "value": 150
+      }
+     ]
+    }
+   ]
+  },
+  "options": {
+   "showHeader": true,
+   "cellHeight": "sm",
+   "footer": {
+    "show": false
+   }
+  },
+  "transformations": [
+   {
+    "id": "organize",
+    "options": {
+     "excludeByName": {
+      "Trace Service": true,
+      "service.name": true,
+      "Duration": true,
+      "Trace Name": true,
+      "Trace ID": true
+     },
+     "indexByName": {
+      "Start time": 0,
+      "ecc.session.id": 1,
+      "jev.hook": 2,
+      "jev.decision": 3,
+      "jev.risk": 4,
+      "jev.profile": 5,
+      "tool.name": 6,
+      "tool.input_summary": 7,
+      "task.head": 8,
+      "Span ID": 9
+     },
+     "renameByName": {
+      "Start time": "Zaman",
+      "ecc.session.id": "Oturum",
+      "jev.hook": "Nokta",
+      "jev.decision": "Karar",
+      "jev.risk": "Risk",
+      "jev.profile": "Profil",
+      "tool.name": "Araç",
+      "tool.input_summary": "İşlem",
+      "task.head": "Görev",
+      "Span ID": "İz"
+     }
+    }
+   },
+   {
+    "id": "sortBy",
+    "options": {
+     "sort": [
+      {
+       "field": "Zaman",
+       "desc": true
+      }
+     ]
+    }
+   }
+  ]
+ }
+]

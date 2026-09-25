@@ -59,7 +59,9 @@ jev review $D/$n.review.md --scope "$(head -1 $spec)" --out $D/$n.triage.md
 ## Izleme
 - Span'ler: `jev.guard` (`jev.decision` = allow | allow-review | ask | deny | deny-protected | skip-readonly | dry-run), `jev.triage` (`jev.profile`, `jev.kind`, `jev.risk`), `jev.review` (`jev.sev.*`).
 - Gauge'lar: `jev_risk`, `jev_task_risk`, `jev_review_*`, `jev_session_info{ecc_session_id, trace_id}` (Grafana degiskeni icin).
-- `monitoring/otel-spanmetrics-dimensions.yaml` → collector'in spanmetrics `dimensions` listesine eklenir; `monitoring/grafana/*.json` panolar; `monitoring/add_row.py` mevcut panoya satir ekler.
+- Sayaclar: `jev_decisions_total{jev_hook=guard|triage|kind|review, jev_decision}` (proje-yerel `.claude/jev/counters.json`'dan kumulatif), `jev_tokens_total`.
+- `monitoring/build_dashboards.py` → `grafana/jev-karar-akisi.json` (ayri pano) + `grafana/jev-row.json`; `monitoring/add_row.py <pano.json>` mevcut panoya 'Jev karar akisi' satirini ekler (idempotent); `otel-spanmetrics-dimensions.yaml` collector'a eklenecek boyutlar.
+- Baska bir projede: proje `.claude/jev.json` alir, ayni collector'a yazar; panolar `project_name` label'i ile ayrisir (satir/pano sorgularina `project_name="x"` eklenebilir).
 
 ## Test
 `JEV_MODE=mock python3 -m unittest discover -s tests -v`

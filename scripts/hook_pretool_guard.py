@@ -103,8 +103,16 @@ def main() -> None:
                  "tool.input_summary": summary, "jev.risk": risk,
                  "jev.risk_bucket": bucket(risk, th) if risk is not None else None}
         attrs.update(extra or {})
+        gauges = {}
+        if risk is not None:
+            gauges["jev_risk"] = risk
+        if (extra or {}).get("jev.latency_ms"):
+            gauges["jev_latency_ms"] = float(extra["jev.latency_ms"])
+        counters = {f"decisions|guard|{decision_label}": 1}
+        if (extra or {}).get("jev.input_tokens"):
+            counters["tokens|guard|input"] = int(extra["jev.input_tokens"])
         otel.emit(cfg, name="jev.guard", attrs=attrs, start_ns=t0, ok=ok, hook_input=hi,
-                  gauges={"jev_risk": risk} if risk is not None else None)
+                  gauges=gauges or None, counters=counters)
 
     # 1) deterministik korunan bolge
     hit = [p for p in paths if in_protected(p, protected)]

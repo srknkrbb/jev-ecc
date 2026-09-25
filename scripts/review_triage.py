@@ -101,7 +101,9 @@ def classify(items: list[dict], scope: str | None, chunk: int, cfg: dict | None 
                          "jev.findings": len(batch), **{f"jev.sev.{k}": v for k, v in counts.items()},
                          "jev.latency_ms": r.latency_ms, "jev.input_tokens": int(r.usage.get("input_tokens", 0) or 0)},
                   gauges={"jev_review_findings": float(len(batch)), "jev_review_critical": float(counts["critical"]),
-                          "jev_review_high": float(counts["high"])})
+                          "jev_review_high": float(counts["high"]), "jev_latency_ms": float(r.latency_ms or 0)},
+                  counters={**{f"decisions|review|{k}": v for k, v in counts.items() if v},
+                            **({"tokens|review|input": int(r.usage.get("input_tokens", 0) or 0)} if r.ok else {})})
     return items
 
 

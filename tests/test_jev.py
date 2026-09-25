@@ -207,6 +207,15 @@ class OtelTests(unittest.TestCase):
         self.assertEqual(attrs["jev.decision"], "deny") and self.assertEqual(attrs["jev.hook"], "guard")
         m = [r for r in received if r[0] == "/v1/metrics"][0][1]["resourceMetrics"][0]["scopeMetrics"][0]["metrics"]
         self.assertIn("jev_session_info", [x["name"] for x in m]) and self.assertIn("jev_risk", [x["name"] for x in m])
+        rms = [r for r in received if r[0] == "/v1/metrics"][0][1]["resourceMetrics"]
+        sums = [x for x in rms[1]["scopeMetrics"][0]["metrics"] if x["name"] == "jev_decisions_total"]
+        self.assertEqual(len(sums), 1)
+        pt = sums[0]["sum"]["dataPoints"][0]
+        self.assertEqual(pt["asInt"], "1") and self.assertTrue(sums[0]["sum"]["isMonotonic"])
+        labels = {a["key"]: list(a["value"].values())[0] for a in pt["attributes"]}
+        self.assertEqual(labels["jev.decision"], "deny")
+        res_attrs = [a["key"] for a in rms[1]["resource"]["attributes"]]
+        self.assertNotIn("ecc.agent.type", res_attrs)  # sayac serisi ajan tipine bolunmemeli
 
 
 if __name__ == "__main__":

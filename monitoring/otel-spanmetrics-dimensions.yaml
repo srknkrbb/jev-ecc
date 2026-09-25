@@ -1,0 +1,9 @@
+# otel-collector config.yaml → connectors.spanmetrics.dimensions listesine eklenecek boyutlar.
+# Boylece ecc_calls_total{span_name="jev.guard", jev_decision="deny", ...} gibi span-metrikleri de olusur
+# (panolar birincil olarak jev_decisions_total sayacini kullanir; bu ek/opsiyoneldir).
+      - name: jev.hook
+      - name: jev.decision
+      - name: jev.profile
+      - name: jev.kind
+      - name: jev.risk_bucket
+      - name: project.name
