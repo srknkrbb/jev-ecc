@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>io.brainsland.jev-local</string>
+  <key>ProgramArguments</key>
+  <array><string>/usr/bin/python3</string><string>__JEV_ECC__/server/jev_local.py</string></array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>JEV_OLLAMA</key><string>http://127.0.0.1:11434</string>
+    <key>JEV_MODEL</key><string>qwen2.5:7b-instruct</string>
+    <key>JEV_PORT</key><string>8765</string>
+  </dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ProcessType</key><string>Background</string>
+  <key>StandardOutPath</key><string>/tmp/jev-local.log</string>
+  <key>StandardErrorPath</key><string>/tmp/jev-local.log</string>
+</dict>
+</plist>
