@@ -10,6 +10,7 @@
     <key>JEV_OLLAMA</key><string>http://127.0.0.1:11434</string>
     <key>JEV_MODEL</key><string>qwen2.5:7b-instruct</string>
     <key>JEV_PORT</key><string>8765</string>
+    <key>JEV_KEEP_ALIVE</key><string>8h</string>
   </dict>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><true/>

@@ -77,7 +77,7 @@ def answer(body):
     qs = body.get("questions") or {}
     if not qs:
         raise ValueError("questions bos")
-    req = {"model": MODEL, "stream": False, "format": _schema(qs), "keep_alive": "30m",
+    req = {"model": MODEL, "stream": False, "format": _schema(qs), "keep_alive": os.environ.get("JEV_KEEP_ALIVE", "30m"),
            "options": {"temperature": 0, "num_ctx": 4096, "num_predict": 400},
            "messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": _prompt(body.get("state"), qs)}]}
     t0 = time.time()
