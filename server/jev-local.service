@@ -1,0 +1,15 @@
+[Unit]
+Description=Jev yerel karar sunucusu (TypeSafe System One uyumlu) -> yerel Ollama
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 %h/work/jev-ecc/server/jev_local.py
+Environment=JEV_OLLAMA=http://127.0.0.1:11434
+Environment=JEV_MODEL=qwen2.5:7b-instruct
+Environment=JEV_PORT=8765
+Environment=JEV_KEEP_ALIVE=8h
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
